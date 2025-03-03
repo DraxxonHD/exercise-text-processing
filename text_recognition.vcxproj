@@ -133,6 +133,9 @@
   <ItemGroup>
     <ClInclude Include="file_handler.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="knowledge.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

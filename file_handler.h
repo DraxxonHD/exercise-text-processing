@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 enum class EPosition
 {
 	START,
@@ -7,7 +9,6 @@ enum class EPosition
 	END,
 };
 
-class FILE;
 class CFile_Handler
 {
 	public:
@@ -20,10 +21,10 @@ class CFile_Handler
 			long _offset = 0
 		);
 	
-		void GetFileContent(unsigned char*& _buffer);
 		void PrintFileContent();
 		void WipeFileContent();
 	private:
+		void GetFileContent();
 		long long GetContentLength();
 	
 	private:

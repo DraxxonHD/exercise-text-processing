@@ -1,12 +1,10 @@
 #include "file_handler.h"
-#include <stdio.h>
-#include "iostream"
 
 CFile_Handler::CFile_Handler(const char*& _FilePath)
 	:m_FilePath(_FilePath)
 	, m_pReadFile(nullptr)
+	, m_pFile(nullptr)
 {
-	m_pFile = nullptr;
 	fopen_s(&m_pFile, _FilePath, "rb+");
 	if (!m_pFile)
 	{
@@ -16,7 +14,7 @@ CFile_Handler::CFile_Handler(const char*& _FilePath)
 
 CFile_Handler::~CFile_Handler()
 {
-	delete m_pReadFile;
+	if (m_pReadFile) delete[] m_pReadFile;
 	fclose(m_pFile);
 }
 
@@ -27,24 +25,24 @@ void CFile_Handler::WriteTextToFile(const char* _text, EPosition _position, long
 	fwrite(_text, sizeof(char), TextLength, m_pFile);
 }
 
-void CFile_Handler::GetFileContent(unsigned char*& _buffer)
+void CFile_Handler::GetFileContent()
 {
-	delete m_pReadFile;
+	if (m_pReadFile) delete[] m_pReadFile;
 	int ContentLength = GetContentLength();
 	unsigned char* pBuffer = new unsigned char[ContentLength + 1];
 	fseek(m_pFile, 0, SEEK_SET);
 	fread(pBuffer, sizeof(unsigned char), ContentLength, m_pFile);
 	pBuffer[ContentLength] = unsigned char('\0');
-	_buffer = pBuffer;
 	m_pReadFile = pBuffer;
 }
 
 void CFile_Handler::PrintFileContent()
 {
-	unsigned char* pBuffer = nullptr;
-	GetFileContent(pBuffer);
-	std::cout << pBuffer << "\n";
-	delete[] pBuffer;
+	if (!m_pReadFile)
+	{
+		GetFileContent();
+	}
+	std::cout << m_pReadFile << "\n";
 }
 
 void CFile_Handler::WipeFileContent()
