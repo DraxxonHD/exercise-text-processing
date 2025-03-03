@@ -20,14 +20,14 @@ CFile_Handler::~CFile_Handler()
 
 void CFile_Handler::WriteTextToFile(const char* _text, EPosition _position, long _offset)
 {
-	int TextLength = strlen(_text);
+	int TextLength = strlen(_text)+1;
 	fseek(m_pFile, _offset, int(_position));
 	fwrite(_text, sizeof(char), TextLength, m_pFile);
 }
 
 void CFile_Handler::GetFileContent()
 {
-	if (m_pReadFile) delete[] m_pReadFile;
+	delete[] m_pReadFile;
 	int ContentLength = GetContentLength();
 	unsigned char* pBuffer = new unsigned char[ContentLength + 1];
 	fseek(m_pFile, 0, SEEK_SET);
@@ -38,10 +38,7 @@ void CFile_Handler::GetFileContent()
 
 void CFile_Handler::PrintFileContent()
 {
-	if (!m_pReadFile)
-	{
-		GetFileContent();
-	}
+	GetFileContent();
 	std::cout << m_pReadFile << "\n";
 }
 

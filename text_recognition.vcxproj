@@ -129,9 +129,11 @@
   <ItemGroup>
     <ClCompile Include="file_handler.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="user_input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="file_handler.h" />
+    <ClInclude Include="user_input.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="knowledge.txt" />
