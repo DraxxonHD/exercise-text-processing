@@ -68,5 +68,4 @@ void CNatural_Language::ApplyStemming(vector<string*>& rtokens)
 
 string& CNatural_Language::StemWord(string& word)
 {
-	return *m_StopWords;
 }
