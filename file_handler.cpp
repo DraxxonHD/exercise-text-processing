@@ -80,5 +80,14 @@ void CFile_Handler::WipeFileContent()
 
 string& CFile_Handler::GetFileContent()
 {
-	return *m_pReadFile;
+	if (nullptr != m_pReadFile)
+	{
+		return *m_pReadFile;
+	}
+	else
+	{
+		cout << "File is not opened!" << endl;
+		m_pReadFile = new string("");
+		return *m_pReadFile;
+	}
 }

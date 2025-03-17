@@ -13,7 +13,7 @@ class CUser_Input
 
 	private:
 		void Fetch_User_Input();
-		bool Empty();
+		bool Empty() const;
 
 	private:
 		 string* m_pUserInput;

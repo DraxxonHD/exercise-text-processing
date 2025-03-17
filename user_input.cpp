@@ -8,7 +8,7 @@ CUser_Input::CUser_Input()
 
 CUser_Input::~CUser_Input()
 {
-	if (m_pUserInput != nullptr)
+	if (nullptr != m_pUserInput)
 	{
 		delete m_pUserInput;
 	}
@@ -16,7 +16,7 @@ CUser_Input::~CUser_Input()
 
 void CUser_Input::Fetch_User_Input()
 {
-	if (m_pUserInput != nullptr)
+	if (nullptr != m_pUserInput)
 	{
 		delete m_pUserInput;
 	}
@@ -33,7 +33,7 @@ string& CUser_Input::GetUserInput()
 	return *m_pUserInput;
 }
 
-bool CUser_Input::Empty()
+bool CUser_Input::Empty() const
 {
-	return m_pUserInput == nullptr || m_pUserInput->empty();
+	return nullptr == m_pUserInput || m_pUserInput->empty();
 }
