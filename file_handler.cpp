@@ -67,8 +67,10 @@ void CFile_Handler::WipeFileContent()
 {
 	if (m_pFile)
 	{
+		fseek(m_pFile, 0, SEEK_END);
+		long FileSize = ftell(m_pFile);
 		fseek(m_pFile, 0, SEEK_SET);
-		fwrite("", sizeof(char), 0, m_pFile);
+		fwrite("", sizeof(char), FileSize, m_pFile);
 	}
 	else
 	{
