@@ -1,21 +1,19 @@
 #include "file_handler.h"
 #include "user_input.h"
+#include "natural_language.h"
 
 int main()
 {
-	std::string* Path = new std::string("knowledge.txt");
-	CFile_Handler* pFileHandler = new CFile_Handler(*Path);
-	CUser_Input* pUserInput = new CUser_Input();
+	string Text = "Aber mein Text ist doch cool, weil cool";
+	CNatural_Language* pNLP = new CNatural_Language();
 
-	pFileHandler->PrintFileContent();
+	vector<string*>& rTokens = pNLP->Process(Text);
 
-	pFileHandler->WipeFileContent();
-	pFileHandler->WriteTextToFile(pUserInput->GetUserInput());
+	for (int index = 0; index < rTokens.size(); index++)
+	{
+		cout << *rTokens.at(index) << " " << endl;
+	}
 
-	pFileHandler->PrintFileContent();
-
-	delete pFileHandler;
-	delete Path;
-	delete pUserInput;
+	delete pNLP;
 	return 0;
 }

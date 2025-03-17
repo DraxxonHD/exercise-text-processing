@@ -82,12 +82,20 @@ string& CFile_Handler::GetFileContent()
 {
 	if (nullptr != m_pReadFile)
 	{
+
 		return *m_pReadFile;
 	}
 	else
 	{
-		cout << "File is not opened!" << endl;
-		m_pReadFile = new string("");
+		fseek(m_pFile, 0, SEEK_END);
+		long long* FileSize = new long long(ftell(m_pFile));
+		fseek(m_pFile, 0, SEEK_SET);
+		if (nullptr != m_pReadFile)
+		{
+			delete m_pReadFile;
+		}
+		m_pReadFile = new string(*FileSize, '\0');
+		fread(&m_pReadFile->front(), sizeof(char), *FileSize, m_pFile);
 		return *m_pReadFile;
 	}
 }
