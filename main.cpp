@@ -3,21 +3,19 @@
 
 int main()
 {
-	const char* Path = "knowledge.txt";
-	CFile_Handler* pFileHandler = new CFile_Handler(Path);
+	std::string* Path = new std::string("knowledge.txt");
+	CFile_Handler* pFileHandler = new CFile_Handler(*Path);
 
 	pFileHandler->PrintFileContent();
 
-	CUser_Iput* pInput = new CUser_Iput();
 
-	pInput->Fetch_User_Input();
 
 	pFileHandler->WipeFileContent();
-	pFileHandler->WriteTextToFile(pInput->GetUserInput());
+	pFileHandler->WriteTextToFile("Testing input");
 
 	pFileHandler->PrintFileContent();
 
-	delete pInput;
 	delete pFileHandler;
+	delete Path;
 	return 0;
 }

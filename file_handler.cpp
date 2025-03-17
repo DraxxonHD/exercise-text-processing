@@ -1,56 +1,82 @@
 #include "file_handler.h"
 
-CFile_Handler::CFile_Handler(const char*& _FilePath)
+CFile_Handler::CFile_Handler(string& _FilePath)
 	:m_FilePath(_FilePath)
 	, m_pReadFile(nullptr)
 	, m_pFile(nullptr)
 {
-	fopen_s(&m_pFile, _FilePath, "rb+");
+	fopen_s(&m_pFile, _FilePath.c_str(), "r+");
 	if (!m_pFile)
 	{
-		std::cout << "failed to open File";
+		cout << "File cannot be opened!" << endl;
+	}
+	else
+	{
+		cout << "File opened!" << endl;
 	}
 }
 
 CFile_Handler::~CFile_Handler()
 {
-	if (m_pReadFile) delete[] m_pReadFile;
-	fclose(m_pFile);
+	if (m_pFile)
+	{
+		fclose(m_pFile);
+	}
+	if (nullptr != m_pReadFile)
+	{
+		delete m_pReadFile;
+	}
 }
 
-void CFile_Handler::WriteTextToFile(const char* _text, EPosition _position, long _offset)
+void CFile_Handler::WriteTextToFile(string _text, EPosition _position, long _offset)
 {
-	int TextLength = strlen(_text)+1;
-	fseek(m_pFile, _offset, int(_position));
-	fwrite(_text, sizeof(char), TextLength, m_pFile);
-}
-
-void CFile_Handler::GetFileContent()
-{
-	delete[] m_pReadFile;
-	int ContentLength = GetContentLength();
-	unsigned char* pBuffer = new unsigned char[ContentLength + 1];
-	fseek(m_pFile, 0, SEEK_SET);
-	fread(pBuffer, sizeof(unsigned char), ContentLength, m_pFile);
-	pBuffer[ContentLength] = unsigned char('\0');
-	m_pReadFile = pBuffer;
+	if (m_pFile)
+	{
+		fseek(m_pFile, 0, (int)_position);
+		fwrite(_text.c_str(), sizeof(char), _text.size(), m_pFile);
+	}
+	else
+	{
+		cout << "File is not opened!" << endl;
+	}
 }
 
 void CFile_Handler::PrintFileContent()
 {
-	GetFileContent();
-	std::cout << m_pReadFile << "\n";
+	if (m_pFile)
+	{
+		fseek(m_pFile, 0, SEEK_END);
+		long long* FileSize = new long long(ftell(m_pFile));
+		fseek(m_pFile, 0, SEEK_SET);
+		if (nullptr != m_pReadFile)
+		{
+			delete m_pReadFile;
+		}
+		m_pReadFile = new string(*FileSize, '\0');
+		fread(&m_pReadFile->front(), sizeof(char), *FileSize, m_pFile);
+		cout << *m_pReadFile << endl;
+		delete FileSize;
+	}
+	else
+	{
+		cout << "File is not opened!" << endl;
+	}
 }
 
 void CFile_Handler::WipeFileContent()
 {
-	int ContentLength = GetContentLength();
-	fseek(m_pFile, 0, SEEK_SET);
-	fwrite("", sizeof(char), ContentLength, m_pFile);
+	if (m_pFile)
+	{
+		fseek(m_pFile, 0, SEEK_SET);
+		fwrite("", sizeof(char), 0, m_pFile);
+	}
+	else
+	{
+		cout << "File is not opened!" << endl;
+	}
 }
 
-long long CFile_Handler::GetContentLength()
+string& CFile_Handler::GetFileContent()
 {
-	fseek(m_pFile, 0, SEEK_END);
-	return ftell(m_pFile);
+	return *m_pReadFile;
 }

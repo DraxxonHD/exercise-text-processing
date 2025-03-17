@@ -1,7 +1,10 @@
 #pragma once
 
 #include <iostream>
+#include <fstream>
+#include <string>
 
+using namespace std;
 enum class EPosition
 {
 	START,
@@ -12,23 +15,21 @@ enum class EPosition
 class CFile_Handler
 {
 	public:
-		CFile_Handler(const char*& _FilePath);
+		CFile_Handler(string& _FilePath);
 		~CFile_Handler();
 	
 		void WriteTextToFile(
-			const char* _text,
+			string _text,
 			EPosition _position = EPosition::START,
 			long _offset = 0
 		);
 	
 		void PrintFileContent();
 		void WipeFileContent();
-	private:
-		void GetFileContent();
-		long long GetContentLength();
+		string& GetFileContent();
 	
 	private:
 		FILE* m_pFile;
-		const char* m_FilePath;
-		unsigned char* m_pReadFile;
+		string& m_FilePath;
+		string* m_pReadFile;
 };

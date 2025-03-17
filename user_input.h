@@ -1,18 +1,20 @@
 #pragma once
+#include <string>
 
+using namespace std;
 
-class CUser_Iput
+class CUser_Input
 {
 	public:
-		CUser_Iput();
-		~CUser_Iput();
+		CUser_Input();
+		~CUser_Input();
 		void Fetch_User_Input();
 
-		const char* GetUserInput();
+		string GetUserInput();
 
 	private:
-		bool CheckInput();
+		bool InputEmpty();
 
 	private:
-		char* m_pUserInput;
+		 string m_pUserInput;
 };

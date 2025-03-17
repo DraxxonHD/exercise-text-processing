@@ -1,32 +1,27 @@
 #include "user_input.h"
 #include <iostream>
-#include <string>
 
-CUser_Iput::CUser_Iput()
-    : m_pUserInput(nullptr)
+CUser_Input::CUser_Input()
+	:m_pUserInput("")
 {
 }
 
-CUser_Iput::~CUser_Iput()
+CUser_Input::~CUser_Input()
 {
-    if (m_pUserInput) delete[] m_pUserInput;
+	m_pUserInput.clear();
 }
 
-void CUser_Iput::Fetch_User_Input()
+void CUser_Input::Fetch_User_Input()
 {
-    std::string input;
-    std::cin >> input;
-    int InputLength = input.length()+1;
-    m_pUserInput = new char[InputLength];
-    strcpy_s(m_pUserInput, InputLength, input.c_str());
+	getline(cin, m_pUserInput);
 }
 
-const char* CUser_Iput::GetUserInput()
+string CUser_Input::GetUserInput()
 {
-    return const_cast<char*> (m_pUserInput);
+	return m_pUserInput;
 }
 
-bool CUser_Iput::CheckInput()
+bool CUser_Input::InputEmpty()
 {
-    return false;
+	return m_pUserInput.empty();
 }
