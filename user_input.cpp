@@ -2,26 +2,38 @@
 #include <iostream>
 
 CUser_Input::CUser_Input()
-	:m_pUserInput("")
+	: m_pUserInput(nullptr)
 {
 }
 
 CUser_Input::~CUser_Input()
 {
-	m_pUserInput.clear();
+	if (m_pUserInput != nullptr)
+	{
+		delete m_pUserInput;
+	}
 }
 
 void CUser_Input::Fetch_User_Input()
 {
-	getline(cin, m_pUserInput);
+	if (m_pUserInput != nullptr)
+	{
+		delete m_pUserInput;
+	}
+	m_pUserInput = new string();
+	getline(cin, *m_pUserInput);
 }
 
-string CUser_Input::GetUserInput()
+string& CUser_Input::GetUserInput()
 {
-	return m_pUserInput;
+	if (Empty())
+	{
+		Fetch_User_Input();
+	}
+	return *m_pUserInput;
 }
 
-bool CUser_Input::InputEmpty()
+bool CUser_Input::Empty()
 {
-	return m_pUserInput.empty();
+	return m_pUserInput == nullptr || m_pUserInput->empty();
 }

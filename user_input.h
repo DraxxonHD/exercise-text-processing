@@ -8,13 +8,13 @@ class CUser_Input
 	public:
 		CUser_Input();
 		~CUser_Input();
+
+		string& GetUserInput();
+
+	private:
 		void Fetch_User_Input();
-
-		string GetUserInput();
-
-	private:
-		bool InputEmpty();
+		bool Empty();
 
 	private:
-		 string m_pUserInput;
+		 string* m_pUserInput;
 };
