@@ -70,7 +70,7 @@ bool CNatural_Language::ActivateVirtualEnvAndRunScript()
 {
 	cout << "Activating virtual environment and running script" << endl;
 	// Set the environment variable for the virtual environment
-	std::string command = "python -m venv venv && .venv\\Scripts\\activate";
+	std::string command = "python -m venv .venv && .venv\\Scripts\\activate";
 	cout << "Executing command: " << command << endl;
 
 	// Execute the command
