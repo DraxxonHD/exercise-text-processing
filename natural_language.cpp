@@ -19,18 +19,18 @@ vector<string*>& CNatural_Language::Process(string& _rinput)
 	// Convert the input text to lowercase
 	transform(_rinput.begin(), _rinput.end(), _rinput.begin(), ::tolower);
 	// Tokenize the input text
-	vector<string*>& tokens = Tokenize(_rinput);
+	vector<string*>& Tokens = Tokenize(_rinput);
 	// Remove stopwords from the tokens
-	RemoveStopwords(tokens, "german_stopwords.txt");
+	RemoveStopwords(Tokens, "german_stopwords.txt");
 	// Apply stemming to the tokens
-	ApplyStemming(tokens);
-	return tokens;
+	ApplyStemming(Tokens);
+	return Tokens;
 }
 
 // Tokenize the input text
 vector<string*>& CNatural_Language::Tokenize(string& _rtext)
 {
-	vector<string*>* tokens = new vector<string*>();
+	vector<string*>* Tokens = new vector<string*>();
 	// remember last index to know the length of the token
 	int last_index = 0;
 	// iterate through the text
@@ -39,22 +39,22 @@ vector<string*>& CNatural_Language::Tokenize(string& _rtext)
 		// if a space or comma is found, create a token from the last index to the current index
 		if (' ' == _rtext.at(index) || ',' == _rtext.at(index))
 		{
-			string* token = new string(_rtext.substr(last_index, index - last_index));
-			tokens->push_back(token);
+			string* pToken = new string(_rtext.substr(last_index, index - last_index));
+			Tokens->push_back(pToken);
 			last_index = index + 1;
 		}
 		// if the last character is reached, create a token from the last index to the end of the text
-		else if (index == _rtext.size() - 1)
+		else if ( _rtext.size() - 1 == index)
 		{
-			string* token = new string(_rtext.substr(last_index, index - last_index + 1));
-			tokens->push_back(token);
+			string* pToken = new string(_rtext.substr(last_index, index - last_index + 1));
+			Tokens->push_back(pToken);
 		}
 	}
-	return *tokens;
+	return *Tokens;
 }
 
 // Remove stopwords from the tokens
-void CNatural_Language::RemoveStopwords(vector<string*>& _rtokens, const string _path)
+void CNatural_Language::RemoveStopwords(vector<string*>& _rtokens, const string& _path)
 {
 	// Read the stopwords from the file
 	string* pPath = new string(_path);
@@ -86,7 +86,7 @@ bool CNatural_Language::ActivateVirtualEnvAndRunScript()
 
 	// Execute the command
 	int result = system(command.c_str());
-	if (result != 0)
+	if (0 != result)
 	{
 		cerr << "Failed to execute command: " << command << endl;
 		return false;
@@ -105,12 +105,12 @@ void CNatural_Language::ApplyStemming(vector<string*>& _rtokens)
 		for (int index = 0; index < _rtokens.size(); index++)
 		{
 			// print the progress
-			cout << "Lemmatizing word " << index << "/" << _rtokens.size() << endl;
+			cout << "Lemmatizing word " << index+1 << "/" << _rtokens.size() << endl;
 
 			// lemmatize the token and replace it in the tokens
-			string result = lemmatizeWord(*_rtokens.at(index));
+			string& rResult = lemmatizeWord(*_rtokens.at(index));
 			delete _rtokens.at(index);
-			_rtokens.at(index) = &result;
+			_rtokens.at(index) = &rResult;
 		}
 	}
 }
@@ -120,7 +120,7 @@ void CNatural_Language::ApplyStemming(vector<string*>& _rtokens)
 string& CNatural_Language::lemmatizeWord(const string& _rword) 
 {
 	// create the command to run the script
-    string command = ".venv\\Scripts\\activate && python morphy_lemma.py " + _rword;
+    string Command = ".venv\\Scripts\\activate && python morphy_lemma.py " + _rword;
 
 	// create a buffer to store the result of the script
     const int BufferSize = 256;
@@ -128,7 +128,7 @@ string& CNatural_Language::lemmatizeWord(const string& _rword)
     string* pResult = new string("");
 
 	// open a pipe to run the script and check if it was successful
-	FILE* pPipe = _popen(command.c_str(), "r");
+	FILE* pPipe = _popen(Command.c_str(), "r");
 	if (!pPipe)
 	{
 		cerr << "Failed to open pipe" << endl;
@@ -138,7 +138,7 @@ string& CNatural_Language::lemmatizeWord(const string& _rword)
 	// read the output of the script line by line and store it in the result
 	while (!feof(pPipe))
 	{
-		if (fgets(pBuffer, BufferSize, pPipe) != nullptr)
+		if (nullptr != fgets(pBuffer, BufferSize, pPipe))
 		{
 			*pResult += pBuffer;
 		}
