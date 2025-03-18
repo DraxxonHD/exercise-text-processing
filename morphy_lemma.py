@@ -1,14 +1,17 @@
-from germalemma import GermaLemma
 import sys
+import spacy
+from germalemma import GermaLemma
 
-def lemmatize(word, pos="VERB"):  # Default: Verb lemmatization
-    lemmatizer = GermaLemma()
-    lemma_dict = lemmatizer.find_lemma(word, pos)  # Correct method to get lemma
+# Load spaCy's German model (optimized: disable unnecessary components)
+nlp = spacy.load("de_core_news_sm", disable=["ner", "parser"])
+lemmatizer = GermaLemma()
 
-    return lemma_dict if lemma_dict else word  # Return lemma or original word
+def lemmatize(word):
+    """Finds the POS tag of a single word and returns its lemma."""
+    doc = nlp(word)  # Tokenization only (faster)
+    pos = doc[0].pos_ if doc else "NOUN"  # Get POS, default to NOUN if empty
+    return lemmatizer.find_lemma(word, pos) or word  # Lowercase for consistency
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        word = sys.argv[1]
-        pos = sys.argv[2] if len(sys.argv) > 2 else "VERB"  # Default to VERB
-        print(lemmatize(word, pos))
+        print(lemmatize(sys.argv[1]))

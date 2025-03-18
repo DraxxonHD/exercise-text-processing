@@ -16,7 +16,9 @@ class CNatural_Language {
         vector<string*>& Tokenize(string& text);
         void RemoveStopwords(vector<string*>& rtokens); 
         void ApplyStemming(vector<string*>& rtokens);
-        string& StemWord(string& word); 
+        string StemWord(string& word); 
+		std::string lemmatizeWord(const std::string& word, const std::string& pos);
+        bool ActivateVirtualEnvAndRunScript();
 
     private:
 
