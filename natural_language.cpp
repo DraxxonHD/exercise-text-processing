@@ -7,57 +7,67 @@
 
 CNatural_Language::CNatural_Language()
 {
-	m_StopWords = new string();
 }
 
 CNatural_Language::~CNatural_Language()
 {
-	if (nullptr != m_StopWords)
-	{
-		delete m_StopWords;
-	}
 }
 
-vector<string*>& CNatural_Language::Process(string& input)
+// Process the input text through the NLP pipeline
+vector<string*>& CNatural_Language::Process(string& _rinput)
 {
-	transform(input.begin(), input.end(), input.begin(), ::tolower);
-	vector<string*>& tokens = Tokenize(input);
-	RemoveStopwords(tokens);
+	// Convert the input text to lowercase
+	transform(_rinput.begin(), _rinput.end(), _rinput.begin(), ::tolower);
+	// Tokenize the input text
+	vector<string*>& tokens = Tokenize(_rinput);
+	// Remove stopwords from the tokens
+	RemoveStopwords(tokens, "german_stopwords.txt");
+	// Apply stemming to the tokens
 	ApplyStemming(tokens);
 	return tokens;
 }
 
-vector<string*>& CNatural_Language::Tokenize(string& text)
+// Tokenize the input text
+vector<string*>& CNatural_Language::Tokenize(string& _rtext)
 {
 	vector<string*>* tokens = new vector<string*>();
+	// remember last index to know the length of the token
 	int last_index = 0;
-	for (int index = 0; index < text.size(); index++)
+	// iterate through the text
+	for (int index = 0; index < _rtext.size(); index++)
 	{
-		if (' ' == text.at(index) || ',' == text.at(index))
+		// if a space or comma is found, create a token from the last index to the current index
+		if (' ' == _rtext.at(index) || ',' == _rtext.at(index))
 		{
-			string* token = new string(text.substr(last_index, index - last_index));
+			string* token = new string(_rtext.substr(last_index, index - last_index));
 			tokens->push_back(token);
 			last_index = index + 1;
 		}
-		else if (index == text.size() - 1)
+		// if the last character is reached, create a token from the last index to the end of the text
+		else if (index == _rtext.size() - 1)
 		{
-			string* token = new string(text.substr(last_index, index - last_index + 1));
+			string* token = new string(_rtext.substr(last_index, index - last_index + 1));
 			tokens->push_back(token);
 		}
 	}
 	return *tokens;
 }
 
-void CNatural_Language::RemoveStopwords(vector<string*>& rtokens)
+// Remove stopwords from the tokens
+void CNatural_Language::RemoveStopwords(vector<string*>& _rtokens, const string _path)
 {
-	string* pPath = new string("german_stopwords.txt");
+	// Read the stopwords from the file
+	string* pPath = new string(_path);
 	CFile_Handler* pFileHandler = new CFile_Handler(*pPath);
 	string& rStopWords = pFileHandler->GetFileContent();
-	for (int index = 0; index < rtokens.size(); index++)
+	// Iterate through the tokens
+	for (int index = 0; index < _rtokens.size(); index++)
 	{
-		if (string::npos != rStopWords.find(*rtokens.at(index)))
+		// If the token is a stopword, remove it from the tokens
+		if (string::npos != rStopWords.find(*_rtokens.at(index)))
 		{
-			rtokens.erase(rtokens.begin() + index);
+			delete _rtokens.at(index);
+			_rtokens.erase(_rtokens.begin() + index);
 		}
 	}
 
@@ -66,69 +76,78 @@ void CNatural_Language::RemoveStopwords(vector<string*>& rtokens)
 	
 }
 
+// Activate the virtual environment and run the script
 bool CNatural_Language::ActivateVirtualEnvAndRunScript()
 {
 	cout << "Activating virtual environment and running script" << endl;
 	// Set the environment variable for the virtual environment
-	std::string command = "python -m venv .venv && .venv\\Scripts\\activate";
+	string command = "python -m venv .venv && .venv\\Scripts\\activate";
 	cout << "Executing command: " << command << endl;
 
 	// Execute the command
-
-	int result = std::system(command.c_str());
+	int result = system(command.c_str());
 	if (result != 0)
 	{
-		std::cerr << "Failed to execute command: " << command << std::endl;
+		cerr << "Failed to execute command: " << command << endl;
 		return false;
 	}
-	std::cout << "Command executed successfully" << std::endl;
+	cout << "Command executed successfully" << endl;
 	return true;
 }
 
-void CNatural_Language::ApplyStemming(vector<string*>& rtokens)
+// Apply stemming to the tokens
+void CNatural_Language::ApplyStemming(vector<string*>& _rtokens)
 {
+	// check if the virtual environment can be activated and the script can be run
 	if (ActivateVirtualEnvAndRunScript())
 	{
-		for (int index = 0; index < rtokens.size(); index++)
+		// iterate through the tokens and lemmatize each token
+		for (int index = 0; index < _rtokens.size(); index++)
 		{
-			*rtokens.at(index) = lemmatizeWord(*rtokens.at(index), "");
+			// print the progress
+			cout << "Lemmatizing word " << index << "/" << _rtokens.size() << endl;
+
+			// lemmatize the token and replace it in the tokens
+			string result = lemmatizeWord(*_rtokens.at(index));
+			delete _rtokens.at(index);
+			_rtokens.at(index) = &result;
 		}
 	}
 }
 
-string CNatural_Language::StemWord(string& word)
+
+// Lemmatize a word
+string& CNatural_Language::lemmatizeWord(const string& _rword) 
 {
-	return string();
-}
+	// create the command to run the script
+    string command = ".venv\\Scripts\\activate && python morphy_lemma.py " + _rword;
 
-
-
-
-std::string CNatural_Language::lemmatizeWord(const std::string& word, const std::string& pos) 
-{
-    std::string command = ".venv\\Scripts\\activate && python morphy_lemma.py " + word;
-
+	// create a buffer to store the result of the script
     const int BufferSize = 256;
     char* pBuffer = new char[BufferSize];
-    std::string result = "";
+    string* pResult = new string("");
+
+	// open a pipe to run the script and check if it was successful
 	FILE* pPipe = _popen(command.c_str(), "r");
 	if (!pPipe)
 	{
-		std::cerr << "Failed to open pipe" << std::endl;
-		return result;
+		cerr << "Failed to open pipe" << endl;
+		return *pResult;
 	}
 
+	// read the output of the script line by line and store it in the result
 	while (!feof(pPipe))
 	{
 		if (fgets(pBuffer, BufferSize, pPipe) != nullptr)
 		{
-			result += pBuffer;
+			*pResult += pBuffer;
 		}
 	}
 
-
-
+	// close the pipe and delete the buffer
 	_pclose(pPipe);
 	delete[] pBuffer;
-    return result;
+
+
+    return *pResult;
 }
