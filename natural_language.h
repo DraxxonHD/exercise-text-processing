@@ -5,20 +5,24 @@
 
 using namespace std;
 
-class CNatural_Language {
+class CNatural_Language 
+{
     public:
-        CNatural_Language();
+        explicit CNatural_Language(const char* _PathToStopWords, const char* _text);
 		~CNatural_Language();
     
-        vector<string*>& Process(string& _rinput);  // Full NLP processing pipeline
+        vector<string*>& GetTokens() const;
+		string& GetStopWords() const;
     
     private:
-        vector<string*>& Tokenize(string& _rtext);
-        void RemoveStopwords(vector<string*>& _rtokens, const string& _path);
-        void ApplyStemming(vector<string*>& _rtokens);
-		string& lemmatizeWord(const std::string& _rword);
+        void Process(string& _rinput);  // Full NLP processing pipeline
+        void Tokenize(string& _rtext);
+        void RemoveStopwords();
+        void ApplyStemming();
+		string& lemmatizeWord(const string& _rword);
         bool ActivateVirtualEnvAndRunScript();
 
     private:
-
+		vector<string*>* m_Tokens;
+		string* m_StopWords;
 };

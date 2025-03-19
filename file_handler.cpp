@@ -1,4 +1,5 @@
 #include "file_handler.h"
+#include <iostream>
 
 CFile_Handler::CFile_Handler(string& _FilePath)
 	:m_FilePath(_FilePath)

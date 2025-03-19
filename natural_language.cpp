@@ -1,36 +1,73 @@
-#include "natural_language.h"
 #include "file_handler.h"
+#include "natural_language.h"
 #include <algorithm>
-#include <sstream>
-#include <array>
 #include <iostream>
 
-CNatural_Language::CNatural_Language()
+CNatural_Language::CNatural_Language(const char* _PathToStopWords, const char* _text)
+	: m_Tokens(new vector<string*>())
 {
+	// Read the stopwords from the file
+	string* pPath = new string(_PathToStopWords);
+	CFile_Handler* pFileHandler = new CFile_Handler(*pPath);
+	m_StopWords = new string(pFileHandler->GetFileContent());
+
+	delete pFileHandler;
+	delete pPath;
+
+	// Process the input text
+	string* pText = new string(_text);
+	Process(*pText);
+	delete pText;
 }
 
 CNatural_Language::~CNatural_Language()
 {
+	// Delete the tokens
+	while (!m_Tokens->empty())
+	{
+		delete m_Tokens->back();
+		m_Tokens->pop_back();
+	}
+	delete m_Tokens;
+
+	// Delete the stopwords
+	delete m_StopWords;
 }
 
 // Process the input text through the NLP pipeline
-vector<string*>& CNatural_Language::Process(string& _rinput)
+void CNatural_Language::Process(string& _rinput)
 {
 	// Convert the input text to lowercase
 	transform(_rinput.begin(), _rinput.end(), _rinput.begin(), ::tolower);
 	// Tokenize the input text
-	vector<string*>& Tokens = Tokenize(_rinput);
+	Tokenize(_rinput);
 	// Remove stopwords from the tokens
-	RemoveStopwords(Tokens, "german_stopwords.txt");
+	RemoveStopwords();
 	// Apply stemming to the tokens
-	ApplyStemming(Tokens);
-	return Tokens;
+	ApplyStemming();
+}
+
+vector<string*>& CNatural_Language::GetTokens() const
+{
+	if (nullptr == m_Tokens)
+	{
+		cerr << "Tokens are empty" << endl;
+	}
+	return *m_Tokens;
+}
+
+string& CNatural_Language::GetStopWords() const
+{
+	if (nullptr == m_StopWords)
+	{
+		cerr << "Stopwords are empty" << endl;
+	}
+	return *m_StopWords;
 }
 
 // Tokenize the input text
-vector<string*>& CNatural_Language::Tokenize(string& _rtext)
+void CNatural_Language::Tokenize(string& _rtext)
 {
-	vector<string*>* Tokens = new vector<string*>();
 	// remember last index to know the length of the token
 	int last_index = 0;
 	// iterate through the text
@@ -40,40 +77,34 @@ vector<string*>& CNatural_Language::Tokenize(string& _rtext)
 		if (' ' == _rtext.at(index) || ',' == _rtext.at(index))
 		{
 			string* pToken = new string(_rtext.substr(last_index, index - last_index));
-			Tokens->push_back(pToken);
+			m_Tokens->push_back(pToken);
 			last_index = index + 1;
 		}
 		// if the last character is reached, create a token from the last index to the end of the text
 		else if ( _rtext.size() - 1 == index)
 		{
 			string* pToken = new string(_rtext.substr(last_index, index - last_index + 1));
-			Tokens->push_back(pToken);
+			m_Tokens->push_back(pToken);
 		}
 	}
-	return *Tokens;
 }
 
 // Remove stopwords from the tokens
-void CNatural_Language::RemoveStopwords(vector<string*>& _rtokens, const string& _path)
+void CNatural_Language::RemoveStopwords()
 {
-	// Read the stopwords from the file
-	string* pPath = new string(_path);
-	CFile_Handler* pFileHandler = new CFile_Handler(*pPath);
-	string& rStopWords = pFileHandler->GetFileContent();
 	// Iterate through the tokens
-	for (int index = 0; index < _rtokens.size(); index++)
+	int TokenSize = m_Tokens->size();
+	for (int index = 0; index < TokenSize; index++)
 	{
 		// If the token is a stopword, remove it from the tokens
-		if (string::npos != rStopWords.find(*_rtokens.at(index)))
+		if (string::npos != m_StopWords->find(*m_Tokens->at(index)))
 		{
-			delete _rtokens.at(index);
-			_rtokens.erase(_rtokens.begin() + index);
+			delete m_Tokens->at(index);
+			m_Tokens->erase(m_Tokens->begin() + index);
+			--index;
+			--TokenSize;
 		}
-	}
-
-	delete pFileHandler;
-	delete pPath;
-	
+	}	
 }
 
 // Activate the virtual environment and run the script
@@ -81,7 +112,7 @@ bool CNatural_Language::ActivateVirtualEnvAndRunScript()
 {
 	cout << "Activating virtual environment and running script" << endl;
 	// Set the environment variable for the virtual environment
-	string command = "python -m venv .venv && .venv\\Scripts\\activate";
+	string command = "python -m venv .venv";
 	cout << "Executing command: " << command << endl;
 
 	// Execute the command
@@ -96,21 +127,21 @@ bool CNatural_Language::ActivateVirtualEnvAndRunScript()
 }
 
 // Apply stemming to the tokens
-void CNatural_Language::ApplyStemming(vector<string*>& _rtokens)
+void CNatural_Language::ApplyStemming()
 {
 	// check if the virtual environment can be activated and the script can be run
 	if (ActivateVirtualEnvAndRunScript())
 	{
 		// iterate through the tokens and lemmatize each token
-		for (int index = 0; index < _rtokens.size(); index++)
+		for (int index = 0; index < m_Tokens->size(); index++)
 		{
 			// print the progress
-			cout << "Lemmatizing word " << index+1 << "/" << _rtokens.size() << endl;
+			cout << "Lemmatizing word " << index+1 << "/" << m_Tokens->size() << endl;
 
 			// lemmatize the token and replace it in the tokens
-			string& rResult = lemmatizeWord(*_rtokens.at(index));
-			delete _rtokens.at(index);
-			_rtokens.at(index) = &rResult;
+			string& rResult = lemmatizeWord(*m_Tokens->at(index));
+			delete m_Tokens->at(index);
+			m_Tokens->at(index) = &rResult;
 		}
 	}
 }
