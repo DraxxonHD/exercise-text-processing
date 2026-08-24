@@ -2,6 +2,12 @@
 #include "natural_language.h"
 #include <algorithm>
 #include <iostream>
+#include <thread>
+#include <future>
+
+
+
+
 
 CNatural_Language::CNatural_Language(const char* _PathToStopWords, const char* _text)
 	: m_Tokens(new vector<string*>())
@@ -129,21 +135,46 @@ bool CNatural_Language::ActivateVirtualEnvAndRunScript()
 // Apply stemming to the tokens
 void CNatural_Language::ApplyStemming()
 {
-	// check if the virtual environment can be activated and the script can be run
 	if (ActivateVirtualEnvAndRunScript())
 	{
-		// iterate through the tokens and lemmatize each token
+
 		for (int index = 0; index < m_Tokens->size(); index++)
 		{
-			// print the progress
-			cout << "Lemmatizing word " << index+1 << "/" << m_Tokens->size() << endl;
+			cout << "Stemming word " << index + 1 << "/" << m_Tokens->size() << endl;
+			// create a thread to lemmatize the word
+			packaged_task<string& (const CNatural_Language&, const string&)> Packaged_Task(&CNatural_Language::lemmatizeWord);
+			future<string&> FutureResult= Packaged_Task.get_future();
+			thread Thread(move(Packaged_Task), ref(*this), *m_Tokens->at(index));
+			Thread.join();
+			*m_Tokens->at(index) = FutureResult.get();
 
-			// lemmatize the token and replace it in the tokens
-			string& rResult = lemmatizeWord(*m_Tokens->at(index));
-			delete m_Tokens->at(index);
-			m_Tokens->at(index) = &rResult;
+			/*
+				std::packaged_task<int(int, int)> task(f);
+				std::future<int> result = task.get_future();
+
+				std::thread task_td(std::move(task), 2, 10);
+				task_td.join();
+				std::cout << "task_thread:\t" << result.get() << '\n';
+
+			*/
 		}
 	}
+
+	//// check if the virtual environment can be activated and the script can be run
+	//if (ActivateVirtualEnvAndRunScript())
+	//{
+	//	// iterate through the tokens and lemmatize each token
+	//	for (int index = 0; index < m_Tokens->size(); index++)
+	//	{
+	//		// print the progress
+	//		cout << "Lemmatizing word " << index+1 << "/" << m_Tokens->size() << endl;
+
+	//		// lemmatize the token and replace it in the tokens
+	//		string& rResult = lemmatizeWord(*m_Tokens->at(index));
+	//		delete m_Tokens->at(index);
+	//		m_Tokens->at(index) = &rResult;
+	//	}
+	//}
 }
 
 
